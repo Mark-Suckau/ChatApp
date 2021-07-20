@@ -7,22 +7,9 @@ from mainUI import mainClass
 from mainUI import mainClass
 
 
-
-
 def rooms():
     root = Tk()
     window1 = Window1(root)
 
 
-
-
 rooms()
-
-
-
-
-
-
-
-
-
