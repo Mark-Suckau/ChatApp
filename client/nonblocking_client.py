@@ -93,7 +93,7 @@ class TCP_Nonblocking_Client:
     
 def run_socket():
   try:
-    tcp_client = TCP_Nonblocking_Client('localhost', 8080, 'Jeff')
+    tcp_client = TCP_Nonblocking_Client('139.162.172.141', 8080, 'Jeff')
     tcp_client.create_socket()
 
     thread = threading.Thread(target=tcp_client.read_message_loop)

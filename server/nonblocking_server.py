@@ -153,7 +153,7 @@ class TCP_Nonblocking_Server:
     
 
 def run_server():
-  server = TCP_Nonblocking_Server('localhost', 8080)
+  server = TCP_Nonblocking_Server('139.162.172.141', 8080)
   server.configure_server()
   server.listen_for_connections()
   
