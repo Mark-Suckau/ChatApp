@@ -4,7 +4,6 @@ import pygame
 from tkinter import *
 from rooms import Window1
 from mainUI import mainClass
-from mainUI import mainClass
 
 
 def rooms():

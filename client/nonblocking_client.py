@@ -3,14 +3,18 @@ import threading
 from datetime import datetime
 import traceback
 import sys
+import queue
 
 class TCP_Nonblocking_Client:
-  def __init__(self, host, port):
+  def __init__(self, host, port, name):
     self.host = host
     self.port = port
     self.sock = None
     self.format = 'utf-8'
+    
+    self.received_messages = queue.Queue()
     self.stop_client = False
+    self.name = name
     
   def print_tstamp(self, msg):
     current_time = datetime.now().strftime("%Y-%M-%d %H:%M:%S")
@@ -65,7 +69,7 @@ class TCP_Nonblocking_Client:
     
     while True:
       try:   
-        req = self.sock.recv(1024).decode(self.format)
+        msg = self.sock.recv(1024).decode(self.format)
           
       except socket.timeout:
         self.print_tstamp('Socket timed out, retrying receive')
@@ -76,19 +80,20 @@ class TCP_Nonblocking_Client:
         traceback.print_exc()
         break
         
-      if req == '':
+      if msg == '':
         # connection closed by peer, exit loop
         self.print_tstamp('Connection closed by server')
         break
         
-      self.print_tstamp(f'Received from [SERVER]: {req}')
+      self.print_tstamp(f'Received from [SERVER]: {msg}')
+      self.received_messages.put(msg)
 
     self.shutdown_socket()
     self.stop_client = True
     
 def run_socket():
   try:
-    tcp_client = TCP_Nonblocking_Client('localhost', 8080)
+    tcp_client = TCP_Nonblocking_Client('localhost', 8080, 'Jeff')
     tcp_client.create_socket()
 
     thread = threading.Thread(target=tcp_client.read_message_loop)
@@ -103,7 +108,7 @@ def run_socket():
       tcp_client.send_message(message)
       
   except KeyboardInterrupt:
-    pass    
+    pass
 
 if __name__ == '__main__':
   run_socket()
