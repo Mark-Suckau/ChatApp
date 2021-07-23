@@ -15,5 +15,3 @@ class mainClass:
 
     def main_screen(self):
         pass
-
-

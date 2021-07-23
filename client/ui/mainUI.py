@@ -1,11 +1,28 @@
 from tkinter import *
+from rooms import mainClass
 from PIL import ImageTk, Image
+
+import os, sys
+# getting the name of the directory
+# where the this file is present.
+current = os.path.dirname(os.path.realpath(__file__))
+  
+# Getting the parent directory name
+# where the current directory is present.
+parent = os.path.dirname(current)
+  
+# adding the parent directory to 
+# the sys.path.
+sys.path.append(parent)
+import nonblocking_client
+
 
 
 class Window1:
     def __init__(self, master):
 
         self.roman = ("Times New Roman", 19)
+        assert isinstance(master, object)
         self.master = master
         self.my = Image.open("bluephoto.png")
         self.my = self.my.resize((620, 695))
@@ -22,7 +39,7 @@ class Window1:
 
         self.save = PhotoImage(file="mainfolders/save.png")
         self.save_label = Label(self.master, image=self.save)
-        self.save_button = Button(self.master, image=self.save, borderwidth=0, command=lambda: self.save_func())
+        self.save_button = Button(self.master, image=self.save, borderwidth=0)
 
         self.join_btn.place(x=670, y=420)
         self.blue_screen.place(x=0, y=1)
@@ -43,7 +60,7 @@ class Window1:
         self.main_text_box.place(x=1, y=0)
 
         self.send_img = PhotoImage(file='mainfolders/send4.png')
-        self.send_button = Button(self.f, image=self.send_img, borderwidth=0)
+        self.send_button = Button(self.f, image=self.send_img, borderwidth=0,command=lambda:self.message())
 
         self.send_button.place(x=150, y=600)
 
@@ -54,7 +71,9 @@ class Window1:
         self.f.geometry("600x700")
 
 
-    def save_func(self):
-        username = self.join_entry.get()
+    def message(self):
 
-        print(username)
+        message = self.main_entry.get()
+
+        assert isinstance(message, object)
+        self.main_text_box.insert(END, str(message) + "\n")

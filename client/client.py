@@ -15,8 +15,6 @@ sys.path.append(parent)
 from universal import message
 
 
-
-
 class TCP_Nonblocking_Client:
   def __init__(self, host, port, username, password):
     self.host = host
