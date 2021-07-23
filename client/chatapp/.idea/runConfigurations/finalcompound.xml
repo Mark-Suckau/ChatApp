@@ -1,8 +1,0 @@
-<component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="finalcompound" type="CompoundRunConfigurationType">
-    <toRun name="mainUI" type="PythonConfigurationType" />
-    <toRun name="rooms" type="PythonConfigurationType" />
-    <toRun name="mainchat" type="PythonConfigurationType" />
-    <method v="2" />
-  </configuration>
-</component>

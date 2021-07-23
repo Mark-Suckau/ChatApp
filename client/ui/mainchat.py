@@ -1,9 +1,6 @@
-import socket
-import threading
-import pygame
 from tkinter import *
-from rooms import Window1
-from mainUI import mainClass
+from rooms import mainClass
+from mainUI import Window1
 
 
 def rooms():
