@@ -48,28 +48,24 @@ class TCP_Nonblocking_Client:
       verified = self.send_verification(self.username, self.password)
       if verified:
         self.print_tstamp('Username and password verified with server')
-        return True
+        
       else:
         self.print_tstamp('Username and/or password could not be verified by server')
         self.shutdown_socket()
         
-        return False # halts execution of top level function calling this function
+        self.stop_client = True # halts execution of top level function calling this function
       
     except socket.error:
-      self.stop_client = True
+      self.stop_client = True # halts execution of top level function calling this function
       
       self.print_tstamp('Encountered an error:')
       traceback.print_exc()
-      
-      return False # halts execution of top level function calling this function
       
     except OSError as err:
-      self.stop_client = True
+      self.stop_client = True # halts execution of top level function calling this function
       
       self.print_tstamp('Encountered an error:')
       traceback.print_exc()
-      
-      return False # halts execution of top level function calling this function
       
   def send_verification(self, username, password):
     msg = message.Verification_Request_Message(username, password)
@@ -88,6 +84,8 @@ class TCP_Nonblocking_Client:
     
   def send_message(self, msg):
     try:
+      if self.stop_client:
+        return
       if msg:
         msg = message.Normal_Message(msg, self.username)
         msg = json.dumps(msg.contents)  # convert python dict to json string
@@ -108,11 +106,11 @@ class TCP_Nonblocking_Client:
     
   def read_message_loop(self):
     # if function returns value then error has occured and interaction should be halted
-    if not self.connect_to_server():
+    if self.stop_client:
       return
     
     while True:
-      try:   
+      try:
         msg = self.sock.recv(1024)    # receive json string encoded with utf-8 from server
         msg = msg.decode(self.format) # decode msg from utf-8 bytes to json string
         msg = json.loads(msg)         # decode json string to python dict
@@ -165,5 +163,5 @@ def run_socket():
   except KeyboardInterrupt:
     pass
 
-if __name__ == '__main__':
-  run_socket()
+#if __name__ == '__main__':
+ # run_socket()
