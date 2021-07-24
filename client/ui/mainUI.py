@@ -111,5 +111,5 @@ class Window1:
             message = self.tcp_client.received_messages.get()
             
             assert isinstance(message, object)
-            self.main_text_box.insert(END, str(message) + "\n")
+            self.main_text_box.insert(END, f'{str(message["username"])}: {str(message["content"])}' + "\n")
     
