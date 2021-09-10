@@ -12,7 +12,7 @@ parent = os.path.dirname(current)
 # the sys.path.
 sys.path.append(parent)
 
-from universal import message
+from shared import message
 
 
 class TCP_Nonblocking_Server:

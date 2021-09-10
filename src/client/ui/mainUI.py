@@ -59,7 +59,7 @@ class Window1:
         self.username = self.username_entry.get()
         self.password = self.password_entry.get()
         
-        self.tcp_client = client.TCP_Nonblocking_Client('localhost', 8080, self.username, self.password)
+        self.tcp_client = client.TCP_Nonblocking_Client('139.162.172.141', 8080, self.username, self.password)
         self.tcp_client.create_socket()
         self.tcp_client.connect_to_server()
         

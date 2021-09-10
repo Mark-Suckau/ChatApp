@@ -12,7 +12,7 @@ parent = os.path.dirname(current)
 # adding the parent directory to 
 # the sys.path.
 sys.path.append(parent)
-from universal import message
+from shared import message
 
 
 class TCP_Nonblocking_Client:
@@ -148,6 +148,7 @@ def run_socket():
     
     tcp_client = TCP_Nonblocking_Client('localhost', 8080, username, password)
     tcp_client.create_socket()
+    tcp_client.connect_to_server()
 
     thread = threading.Thread(target=tcp_client.read_message_loop)
     thread.daemon = True
@@ -163,5 +164,5 @@ def run_socket():
   except KeyboardInterrupt:
     pass
 
-#if __name__ == '__main__':
- # run_socket()
+if __name__ == '__main__':
+  run_socket()

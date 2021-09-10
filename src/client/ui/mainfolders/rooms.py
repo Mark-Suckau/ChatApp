@@ -10,7 +10,7 @@ class Window1:
 
         self.roman = ("Times New Roman", 19)
         self.master = master
-        self.my = Image.open("bluephoto.png")
+        self.my = Image.open("images/bluephoto.png")
         self.my = self.my.resize((620, 695))
 
         self.blue_img = ImageTk.PhotoImage(self.my)
@@ -19,11 +19,11 @@ class Window1:
         self.join_entry = Entry(self.master, width=45, font=self.roman, borderwidth=4)
         self.main_label = Label(self.master, text="            Enter Username", font=("Helvetica", 30))
 
-        self.image_btn = PhotoImage(file="mainfolders/Join-Button.png")
+        self.image_btn = PhotoImage(file="images/Join-Button.png")
         self.btn_label = Label(self.master, image=self.image_btn)
         self.join_btn = Button(self.master, image=self.image_btn, borderwidth=0, command=lambda: self.main_level())
 
-        self.save = PhotoImage(file="mainfolders/save.png")
+        self.save = PhotoImage(file="images/save.png")
         self.save_label = Label(self.master, image=self.save)
         self.save_button = Button(self.master, image=self.save, borderwidth=0, command=lambda: self.save_func())
 
@@ -45,7 +45,7 @@ class Window1:
         self.main_text_box = Text(self.f, padx=18, pady=70, font=("Times New Roman", 11))
         self.main_text_box.place(x=1, y=0)
 
-        self.send_img = PhotoImage(file='mainfolders/send4.png')
+        self.send_img = PhotoImage(file='images/send4.png')
         self.send_button = Button(self.f, image=self.send_img, borderwidth=0)
 
         self.send_button.place(x=150, y=600)
