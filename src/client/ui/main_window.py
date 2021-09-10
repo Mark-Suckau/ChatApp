@@ -40,6 +40,9 @@ class Window:
         self.password_label.place(x=640, y=160)
         self.password_entry.place(x=640, y=245)
 
+        self.error_messages = Text(self.master, font=('Times New Roman', 11))
+        self.error_messages.place(x=640, y=300)
+
         self.image_btn = PhotoImage(file="images/Join-Button.png")
         self.btn_label = Label(self.master, image=self.image_btn)
         self.join_btn = Button(self.master, image=self.image_btn, borderwidth=0, command=lambda: self.open_chat())
@@ -54,39 +57,18 @@ class Window:
         self.master.geometry("1230x703")
         self.master.mainloop()
         
-    def connect(self):
-        self.username = self.username_entry.get()
-        self.password = self.password_entry.get()
-        
-        self.tcp_client = client.TCP_Nonblocking_Client('139.162.172.141', 8080, self.username, self.password)
-        self.tcp_client.create_socket()
-        self.tcp_client.connect_to_server()
-        
-        # will be true when something goes wrong (in this case if connection fails)
-        if self.tcp_client.stop_client:
-            return False
-
-        reading_thread = threading.Thread(target=self.tcp_client.read_message_loop)
-        reading_thread.daemon = True
-        reading_thread.start()
-        
-        displaying_thread = threading.Thread(target=self.display_messages)
-        displaying_thread.daemon = True
-        displaying_thread.start()
-        return True
-
     def open_chat(self):
-        if not self.connect():
-            self.display_login_error('Incorrect username or password')
+        connection_success, connection_msg = self.connect()
+        if not connection_success:
+            self.display_error(connection_msg)
             return
         
         self.f = Toplevel()
-        self.main_text_box = Text(self.f, padx=18, pady=70, font=("Times New Roman", 11))
+        self.main_text_box = Text(self.f, padx=18, pady=70, font=('Times New Roman', 11))
         self.main_text_box.place(x=1, y=0)
 
         self.send_img = PhotoImage(file='images/send4.png')
         self.send_button = Button(self.f, image=self.send_img, borderwidth=0, command=lambda:self.send_message())
-
         self.send_button.place(x=150, y=600)
 
         self.send_message_entry = Entry(self.f, width=28, font=("Times New Roman", 30))
@@ -94,21 +76,44 @@ class Window:
 
         self.f.title('Chat App')
         self.f.geometry("600x700")
+        
+    def connect(self):
+        self.username = self.username_entry.get()
+        self.password = self.password_entry.get()
+        
+        self.tcp_client = client.TCP_Nonblocking_Client('localhost', 8080, self.username, self.password)
+        self.tcp_client.create_socket()
+        connection_success, connection_msg = self.tcp_client.connect_to_server()
+        
+        if not connection_success:
+            return False, connection_msg
+                
+        reading_thread = threading.Thread(target=self.tcp_client.read_message_loop)
+        reading_thread.daemon = True
+        reading_thread.start()
+        
+        displaying_thread = threading.Thread(target=self.display_messages)
+        displaying_thread.daemon = True
+        displaying_thread.start()
+        return True, connection_msg
 
-    def display_login_error(self, error_msg):
+    def display_error(self, error_msg):
+        assert isinstance(error_msg, object)
+        self.error_messages.insert(END, f'Error: {str(error_msg)}\n')
         pass # display error when logging in
 
     def send_message(self):
         message = self.send_message_entry.get()
-        self.tcp_client.send_message(message)
+        send_success, msg = self.tcp_client.send_message(message)
+        if not send_success:
+            self.display_error(msg)
+        
+        return send_success, msg
         
     def display_messages(self):
         while True:
-            if self.tcp_client.stop_client:
-                break
-            
             message = self.tcp_client.received_messages.get()
             
             assert isinstance(message, object)
-            self.main_text_box.insert(END, f'{str(message["username"])}: {str(message["content"])}' + "\n")
+            self.main_text_box.insert(END, f'{str(message["username"])}: {str(message["content"])}\n')
     
