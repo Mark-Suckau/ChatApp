@@ -10,7 +10,7 @@ class mainClass:
         self.home_label = Label(self.master, padx=40, pady=20, text="Hello world")
         self.home_label.pack()
 
-        self.send_entry = Entry(self.master, width=45, font=Roman)
+        self.send_entry = Entry(self.master, width=45, font='Roman')
         self.master.mainloop()
 
     def main_screen(self):

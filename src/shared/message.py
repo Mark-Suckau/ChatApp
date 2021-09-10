@@ -17,7 +17,7 @@ class Normal_Message:
   
   @staticmethod
   def keep_necessary_keys(msg):
-    # removes possibly exess keys added by client
+    # removes possibly excess keys added by client
     new_msg = {"content": msg["content"], "username": msg["username"]}
     
     return new_msg
@@ -40,7 +40,7 @@ class Verification_Request_Message:
   
   @staticmethod
   def keep_necessary_keys(msg):
-    # removes possibly exess keys added by client
+    # removes possibly excess keys added by client
     new_msg = {"username": msg["username"], "password": msg["password"]}
     
     return new_msg
@@ -63,7 +63,7 @@ class Verification_Response_Message:
   
   @staticmethod
   def keep_necessary_keys(msg):
-    # removes possibly exess keys added by client
+    # removes possibly excess keys added by client
     new_msg = {"valid": msg["valid"]}
     
     return new_msg
