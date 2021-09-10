@@ -1,7 +1,5 @@
 from tkinter import *
-from rooms import mainClass
-from mainUI import Window1
-
+from rooms import Window1
 
 def rooms():
     root = Tk()
