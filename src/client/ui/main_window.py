@@ -18,7 +18,7 @@ import client
 
 
 
-class Window1:
+class Window:
     def __init__(self, master):
         self.roman = ("Times New Roman", 19)
         assert isinstance(master, object)

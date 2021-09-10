@@ -1,9 +1,9 @@
 from tkinter import *
-from rooms import Window1
+from main_window import Window
 
 def rooms():
     root = Tk()
-    window1 = Window1(root)
+    window = Window(root)
 
 
 rooms()
