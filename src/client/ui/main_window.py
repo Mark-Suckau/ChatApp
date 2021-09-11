@@ -100,7 +100,6 @@ class Window:
     def display_error(self, error_msg):
         assert isinstance(error_msg, object)
         self.error_messages.insert(END, f'Error: {str(error_msg)}\n')
-        pass # display error when logging in
 
     def send_message(self):
         message = self.send_message_entry.get()
