@@ -14,12 +14,14 @@ CREATE TABLE IF NOT EXISTS user_room(
   room_id INT,
   CONSTRAINT fk_room
     FOREIGN KEY(room_id)
-    REFERENCES room(room_id),
- 
+    REFERENCES room(room_id)
+ 	ON DELETE CASCADE,
+  
   user_id INT,
   CONSTRAINT fk_users
-     FOREIGN KEY(user_id) 
-     REFERENCES users(user_id)
+    FOREIGN KEY(user_id) 
+    REFERENCES users(user_id)
+  	ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS message(
@@ -31,19 +33,11 @@ CREATE TABLE IF NOT EXISTS message(
   CONSTRAINT fk_users
   	FOREIGN KEY(creator_id)
   	REFERENCES users(user_id)
-);
-
-CREATE TABLE IF NOT EXISTS message_recipient(
-  message_recipient_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  is_read BOOL,
+  	ON DELETE CASCADE,
   
-  recipient_id INT,
-  CONSTRAINT fk_recipient
-    FOREIGN KEY(recipient_id)
-  	REFERENCES users(user_id),
-  
-  message_id INT,
-  CONSTRAINT fk_message
-  	FOREIGN KEY(message_id)
-  	REFERENCES message(message_id)
+  room_id INT,
+  CONSTRAINT fk_room
+  	FOREIGN KEY(room_id)
+  	REFERENCES room(room_id)
+  	ON DELETE CASCADE
 );
