@@ -103,8 +103,8 @@ class DB_Connector:
                                        FROM room
                                        INNER JOIN message
                                        ON room.room_id = message.room_id
-                                       WHERE NOT (create_date < %s OR
-                                       create_date > %s) AND
+                                       WHERE NOT (create_date < %d OR
+                                       create_date > %d) AND
                                        message.room_id = %s;''', 
                                        start_date, end_date, room_id)
     
@@ -120,8 +120,8 @@ class DB_Connector:
                                   ON room.room_id = user_room.room_id
                                   INNER JOIN message
                                   ON message.room_id = room.room_id
-                                  WHERE NOT (message.create_date < %s 
-                                  OR message.create_date > %s) 
+                                  WHERE NOT (message.create_date < %d 
+                                  OR message.create_date > %d) 
                                   AND users.user_id = 1;''', start_date, end_date, user_id)
     
     return user_messages
@@ -137,8 +137,8 @@ class DB_Connector:
                                   ON room.room_id = user_room.room_id
                                   INNER JOIN message
                                   ON message.room_id = room.room_id
-                                  WHERE NOT (message.create_date < %s 
-                                  OR message.create_date > %s) 
+                                  WHERE NOT (message.create_date < %d 
+                                  OR message.create_date > %d) 
                                   AND message.room_id = %s
                                   AND users.user_id = 1;''', start_date, end_date, room_id, user_id)
     
