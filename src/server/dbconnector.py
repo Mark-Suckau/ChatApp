@@ -14,7 +14,8 @@ class DB_Connector:
     # creates tables if they dont already exists using schema from sql/create_tables
     self.cursor.execute('''CREATE TABLE IF NOT EXISTS users(
                           user_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-                          user_name VARCHAR(255) NOT NULL
+                          user_name VARCHAR(255) NOT NULL,
+                          user_password_hash VARCHAR(255) NOT NULL
                         );
 
                         CREATE TABLE IF NOT EXISTS room(

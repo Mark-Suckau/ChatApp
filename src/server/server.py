@@ -216,7 +216,18 @@ class TCP_Nonblocking_Server:
     
 
 def run_server():
-  server = TCP_Nonblocking_Server('localhost', 8080)
+  # getting the name of the directory
+  # where the this file is present.
+  current = os.path.dirname(os.path.realpath(__file__))
+    
+  # Getting the parent directory name
+  # where the current directory is present.
+  parent = os.path.dirname(current)
+
+  with open(f'{parent}\\shared\\server_info.json', 'r') as f:
+    server_info = json.loads(f.read())
+  
+  server = TCP_Nonblocking_Server(server_info["python_server"]["ip"], server_info["python_server"]["port"])
   server.configure_server()
   server.listen_for_connections()
   

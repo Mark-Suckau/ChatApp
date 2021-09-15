@@ -1,0 +1,10 @@
+{
+  "python_server": {
+    "ip": "localhost",
+    "port": 8080
+  },
+  "postgres_server": {
+    "ip": "1",
+    "port": "1"
+  }
+}

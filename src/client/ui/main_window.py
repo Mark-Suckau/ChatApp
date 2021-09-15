@@ -1,6 +1,7 @@
 from tkinter import *
 from PIL import ImageTk, Image
 import threading
+import json
 
 import os, sys
 # getting the name of the directory
@@ -81,7 +82,22 @@ class Window:
         self.username = self.username_entry.get()
         self.password = self.password_entry.get()
         
-        self.tcp_client = client.TCP_Nonblocking_Client('localhost', 8080, self.username, self.password)
+        # getting the name of the directory
+        # where the this file is present.
+        current = os.path.dirname(os.path.realpath(__file__))
+        
+        # Getting the parent directory name
+        # where the current directory is present.
+        parent = os.path.dirname(current)
+        
+        # get parent folder of this parent folder
+        parent = os.path.dirname(parent)
+        
+        with open(f'{parent}\\shared\\server_info.json') as f:
+            server_info = json.loads(f.read())
+        
+
+        self.tcp_client = client.TCP_Nonblocking_Client(server_info["python_server"]["ip"], server_info["python_server"]["port"], self.username, self.password)
         self.tcp_client.create_socket()
         connection_success, connection_msg = self.tcp_client.connect_to_server()
         
