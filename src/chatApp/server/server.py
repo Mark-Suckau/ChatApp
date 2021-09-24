@@ -1,17 +1,5 @@
 import socket, queue, select, json, traceback, os, sys
 from datetime import datetime
-# getting the name of the directory
-# where the this file is present.
-current = os.path.dirname(os.path.realpath(__file__))
-  
-# Getting the parent directory name
-# where the current directory is present.
-parent = os.path.dirname(current)
-  
-# adding the parent directory to 
-# the sys.path.
-sys.path.append(parent)
-
 from shared import message
 
 
@@ -27,6 +15,8 @@ class TCP_Nonblocking_Server:
     self.client_list = [] # used for storing sockets
     self.client_info = {} # used for storing info about sockets (ex. address, etc.)
     self.client_messages = queue.Queue() # used for saving messages from clients before sending them to all other clients
+    
+    self.configure_server()
   
   def print_tstamp(self, msg):
     current_time = datetime.now().strftime('%Y-%M-%d %H:%M:%S')
@@ -215,20 +205,8 @@ class TCP_Nonblocking_Server:
     self.sock.close()
     
 
-def run_server():
-  # getting the name of the directory
-  # where the this file is present.
-  current = os.path.dirname(os.path.realpath(__file__))
-    
-  # Getting the parent directory name
-  # where the current directory is present.
-  parent = os.path.dirname(current)
-
-  with open(f'{parent}\\shared\\server_info.json', 'r') as f:
-    server_info = json.loads(f.read())
-  
-  server = TCP_Nonblocking_Server(server_info["python_server"]["ip"], server_info["python_server"]["port"])
-  server.configure_server()
+def run_server():  
+  server = TCP_Nonblocking_Server('localhost', 8080)
   server.listen_for_connections()
   
 if __name__ == '__main__':

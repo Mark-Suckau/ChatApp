@@ -136,25 +136,14 @@ class TCP_Nonblocking_Client:
     self.shutdown_socket()
     self.stop_client = True
     
-def run_socket():
+def run_client():
   try:
     print('Username: ')
     username = input()
     print('Password: ')
     password = input()
     
-    # getting the name of the directory
-    # where the this file is present.
-    current = os.path.dirname(os.path.realpath(__file__))
-      
-    # Getting the parent directory name
-    # where the current directory is present.
-    parent = os.path.dirname(current)
-    
-    with open(f'{parent}\\shared\\server_info.json', 'r') as f:
-      server_info = json.loads(f.read())
-    
-    tcp_client = TCP_Nonblocking_Client(server_info["python_server"]["ip"], server_info["python_server"]["ip"], username, password)
+    tcp_client = TCP_Nonblocking_Client('localhost', 8080, username, password)
     tcp_client.create_socket()
     tcp_client.connect_to_server()
 
@@ -172,5 +161,5 @@ def run_socket():
   except KeyboardInterrupt:
     pass
 
-#if __name__ == '__main__':
-#  run_socket()
+if __name__ == '__main__':
+  run_client()

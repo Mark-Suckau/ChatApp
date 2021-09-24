@@ -1,9 +1,9 @@
 from tkinter import *
 from main_window import Window
 
-def rooms():
+def run_ui():
     root = Tk()
     window = Window(root)
 
 
-rooms()
+run_ui()
