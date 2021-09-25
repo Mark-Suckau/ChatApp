@@ -1,17 +1,5 @@
 import socket, threading, traceback, queue, json, os, sys
 from datetime import datetime
-
-# getting the name of the directory
-# where the this file is present.
-current = os.path.dirname(os.path.realpath(__file__))
-  
-# Getting the parent directory name
-# where the current directory is present.
-parent = os.path.dirname(current)
-  
-# adding the parent directory to 
-# the sys.path.
-sys.path.append(parent)
 from shared import message
 
 
@@ -153,9 +141,6 @@ def run_client():
     
     while True:
       message = input()
-      if tcp_client.stop_client:
-        tcp_client.print_tstamp('Socket already closed, message not sent')
-        break
       tcp_client.send_message(message)
       
   except KeyboardInterrupt:

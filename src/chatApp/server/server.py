@@ -1,8 +1,6 @@
 import socket, queue, select, json, traceback, os, sys
 from datetime import datetime
 from shared import message
-
-
 class TCP_Nonblocking_Server:
   def __init__(self, host, port):
     self.host = host

@@ -1,0 +1,30 @@
+{
+  "messages": {
+    "server": {
+      "message_types": {
+        "VERIFICATION_RESPONSE": "verification_response"
+      },
+      "server_response": {
+        "VERIFICATION_SUCCESS": "Username and password verified with server",
+        "VERIFICATION_FAILURE": "Username and password could not be verified with server",
+        "VERIFICATION_INVALID_FORMAT": "Message sent to server was not valid verification request message"
+      },
+      "server_status": {
+        "CONNECTION_ACCEPTED": "f'Accepted new connection from {client_addr}'",
+        "CONNECTION_CLOSED": "f'Socket closed from address {client_addr}'",
+        "CONNECTION_DISCONNECTED": "f'{client_addr} disconnected'",
+        "GENERIC_ERROR": "Encountered an error",
+        "configuring_server": {
+          "SOCKET_CREATED": "Socket created",
+          "SOCKET_BOUND": "f'Bound socket to {self.host} on port {self.port}'"
+        }
+      }
+    },
+    "client": {
+      "message_types": {
+        "TEXT": "text",
+        "VERIFICATION_REQUEST": "verification_request"
+      }
+    }
+  }
+}
