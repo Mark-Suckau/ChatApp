@@ -1,11 +1,8 @@
-# used to unify format of messages sent between server and client so that a single class can be changed to change formatting
-
+# used to unify format of messages sent between server and client so that a single file can be changed to change formatting
 import json
 
-
-if __name__ == '__main__': # ! REMOVE
-  with open('shared_config.json', 'r') as config_json:
-    shared_config = json.load(config_json)
+with open('shared_config.json', 'r') as config_json:
+  shared_config = json.load(config_json)
   
 config_msg_types_client = shared_config["messages"]["client"]["message_types"]
 config_msg_types_server = shared_config["messages"]["server"]["message_types"]
