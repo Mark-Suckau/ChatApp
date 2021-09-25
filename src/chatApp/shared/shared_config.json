@@ -4,8 +4,7 @@
       "message_types": {
         "VERIFICATION_RESPONSE": "verification_response"
       },
-      "server_response": {
-        "VERIFICATION_SUCCESS": "Username and password verified with server",
+      "server_response_errors": {
         "VERIFICATION_FAILURE": "Username and password could not be verified with server",
         "VERIFICATION_INVALID_FORMAT": "Message sent to server was not valid verification request message"
       },
@@ -25,6 +24,9 @@
         "TEXT": "text",
         "VERIFICATION_REQUEST": "verification_request"
       }
+    },
+    "status_codes": {
+      "401": "Unauthorized"
     }
   }
 }
