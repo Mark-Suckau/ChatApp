@@ -1,14 +1,16 @@
-import socket, threading, traceback, queue, json, os, sys
+import socket, threading, traceback, queue, json
 from datetime import datetime
-from shared import message
+from chatapp.shared import message
 
 
 class TCP_Nonblocking_Client:
-  def __init__(self, host, port, username, password):
+  def __init__(self, host, port, username, password, verbose_output=True):
     self.host = host
     self.port = port
     self.sock = None
     self.format = 'utf-8'
+    
+    self.verbose_output = verbose_output
     
     self.username = username
     self.password = password
@@ -16,8 +18,9 @@ class TCP_Nonblocking_Client:
     self.received_messages = queue.Queue()
     
   def print_tstamp(self, msg):
-    current_time = datetime.now().strftime("%Y-%M-%d %H:%M:%S")
-    print(f'[{current_time}] [CLIENT] {msg}')
+    if self.verbose_output:
+      current_time = datetime.now().strftime("%Y-%M-%d %H:%M:%S")
+      print(f'[{current_time}] [CLIENT] {msg}')
   
   def create_socket(self):
     self.print_tstamp('Creating socket...')
@@ -33,8 +36,8 @@ class TCP_Nonblocking_Client:
 
       self.print_tstamp('Verifying username and password with server...')
       
-      verified = self.send_verification(self.username, self.password)
-      if verified:
+      verification_response = self.send_verification(self.username, self.password)
+      if verification_response['verified']:
         self.print_tstamp('Username and password verified with server')
         
         return True, ''
@@ -58,25 +61,26 @@ class TCP_Nonblocking_Client:
       return False, 'Encountered an OSError'
       
   def send_verification(self, username, password):
-    msg = message.Verification_Request_Message(username, password)
-    msg = json.dumps(msg.contents)
+    # attempts to verify username, password with server; returns response from server or false if response from server was incorrectly formatted
+    msg = message.create_message(message.config_msg_types_client['VERIFICATION_REQUEST'], username=username, password=password)
+    msg = json.dumps(msg)
     msg = msg.encode(self.format)
     
     self.sock.send(msg)
-    response = self.sock.recv(64)
+    response = self.sock.recv(128)
     response = response.decode(self.format)
     response = json.loads(response)
     
-    if message.Verification_Response_Message.is_verification_response_message(response):
-      return response["verified"] # returns true or false based on if the server could verify the request or not
+    if message.is_type(response, message.config_msg_types_server['VERIFICATION_RESPONSE']):
+      return response
     
     return False
     
   def send_message(self, msg):
     try:
       if msg:
-        msg = message.Normal_Message(msg, self.username)
-        msg = json.dumps(msg.contents)  # convert python dict to json string
+        msg = message.create_message(message.config_msg_types_client['CLIENT_TEXT'], msg_body=msg)
+        msg = json.dumps(msg)  # convert python dict to json string
         msg = msg.encode(self.format)   # convert json string to utf-8 bytes
         send_info = self.sock.send(msg) # send json string encoded with utf-8
         self.print_tstamp(f'Sent {send_info} bytes to the server')

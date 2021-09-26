@@ -1,6 +1,6 @@
 from setuptools import setup
 
-setup(name='chatApp',
+setup(name='chatapp',
       version='0.1',
       description='A module containing all required code for chatApp',
       url='https://github.com/Mark-Suckau/ChatApp',

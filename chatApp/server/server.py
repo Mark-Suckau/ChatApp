@@ -1,14 +1,15 @@
-import socket, queue, select, json, traceback, os, sys
+import socket, queue, select, json, traceback
 from datetime import datetime
-from shared import message
+from chatapp.shared import message
 class TCP_Nonblocking_Server:
-  def __init__(self, host, port):
+  def __init__(self, host, port, verbose_output=True):
     self.host = host
     self.port = port
     self.sock = None
     self.timeout = 1 # timeout for select.select() in listen_for_connections()
     
     self.format = 'utf-8'
+    self.verbose_output = verbose_output # determines if anything is logged to terminal
     
     self.client_list = [] # used for storing sockets
     self.client_info = {} # used for storing info about sockets (ex. address, etc.)
@@ -17,8 +18,9 @@ class TCP_Nonblocking_Server:
     self.configure_server()
   
   def print_tstamp(self, msg):
-    current_time = datetime.now().strftime('%Y-%M-%d %H:%M:%S')
-    print(f'[{current_time}] [SERVER] {msg}')
+    if self.verbose_output:
+      current_time = datetime.now().strftime('%Y-%M-%d %H:%M:%S')
+      print(f'[{current_time}] [SERVER] {msg}')
     
   def configure_server(self):
     self.print_tstamp('Creating socket...')
@@ -39,11 +41,11 @@ class TCP_Nonblocking_Server:
     
     client_sock.setblocking(False)
     
-    self.client_info[client_sock] = {"address": client_addr, "verified": False}
+    self.client_info[client_sock] = {'address': client_addr, 'verified': False}
     self.client_list.append(client_sock)
     
   def close_client_socket(self, client_sock):
-    client_addr = self.client_info[client_sock]["address"]
+    client_addr = self.client_info[client_sock]['address']
     self.print_tstamp(f'Closing socket from address {client_addr}...')
     
     for s in self.client_list:
@@ -58,8 +60,8 @@ class TCP_Nonblocking_Server:
   def receive_message(self, client_sock):
     try:    
       data_encoded = client_sock.recv(1024)
-      client_addr = self.client_info[client_sock]["address"]
-      client_verified = self.client_info[client_sock]["verified"]
+      client_addr = self.client_info[client_sock]['address']
+      client_verified = self.client_info[client_sock]['verified']
       
       if not data_encoded:
         # no data sent from client thus client must have disconnected
@@ -72,15 +74,14 @@ class TCP_Nonblocking_Server:
       
       # check if client is verified
       if not client_verified:
-        # check if client is sending a verification request
-        if message.Verification_Request_Message.is_verification_request_message(data):
-          data = message.Verification_Request_Message.keep_necessary_keys(data) # filters out unnecessary keys
+        # check if client is sending a valid verification request
+        if message.is_type(data, message.config_msg_types_client['VERIFICATION_REQUEST']):
           
           # attempt to verify client
-          could_verify = self.verify_client(client_sock, data["username"], data["password"])
+          could_verify = self.verify_client(client_sock, data['username'], data['password'])
 
-          msg = message.Verification_Response_Message(could_verify)
-          msg = json.dumps(msg.contents)
+          msg = message.create_message(type=message.config_msg_types_server['VERIFICATION_RESPONSE'], verified=could_verify, error_msg='a', status_code='a')
+          msg = json.dumps(msg)
           msg = msg.encode(self.format)
           
           client_sock.send(msg)
@@ -95,7 +96,7 @@ class TCP_Nonblocking_Server:
           
       else:
         # if client is verified, then check if message is correctly formatted and accept message, not correctly formatted messages will be ignored
-        if message.Normal_Message.is_normal_message(data):
+        if message.is_type(data, 'CLIENT_TEXT'):
           self.print_tstamp(f'{client_addr} client says: [{data}]')
 
           self.client_messages.put(data)
@@ -116,7 +117,7 @@ class TCP_Nonblocking_Server:
   def verify_client(self, client_sock, username, password):
     #return True or False depending on if client could be verified
     if username == 'testUsername' and password == 'testPassword':
-      self.client_info[client_sock]["verified"] = True
+      self.client_info[client_sock]['verified'] = True
       return True
 
     return False
@@ -127,7 +128,7 @@ class TCP_Nonblocking_Server:
     try:
       msg = self.client_messages.get_nowait() # get message sent from a client
       msg = json.dumps(msg)          # convert from python dict to json string
-      msg = msg.encode(self.format)           # encode from json string to utf-8 bytes
+      msg = msg.encode(self.format)  # encode from json string to utf-8 bytes
 
       self.print_tstamp(f'Broadcasting message to {len(client_socks)} clients...')
       for s in client_socks:
@@ -141,12 +142,12 @@ class TCP_Nonblocking_Server:
     # respond to client with a predefined message from the server
     
     try:
-      client_addr = self.client_info[client_sock]["address"]
-      client_username = self.client_info[client_sock]["username"]
+      client_addr = self.client_info[client_sock]['address']
+      client_username = self.client_info[client_sock]['username']
       
-      msg = message.Normal_Message(msg_content, client_username)
+      msg = message.create_message(type=message.config_msg_types_server['SERVER_TEXT'], msg_body=msg_content, username=client_username)
       
-      msg = json.dumps(msg.contents)            # convert msg from python dict to json string
+      msg = json.dumps(msg)            # convert msg from python dict to json string
       msg = msg.encode(self.format)             # encoding msg from json string to utf-8 bytes
       send_info = client_sock.send(msg)         # sending msg
       
@@ -162,7 +163,7 @@ class TCP_Nonblocking_Server:
     
     
   def handle_exception_socket(self, client_sock):
-    client_addr = self.client_info[client_sock]["address"]
+    client_addr = self.client_info[client_sock]['address']
     self.close_client_socket(client_sock)
     self.print_tstamp(f'Closed exception socket from address {client_addr}')
 

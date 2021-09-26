@@ -2,6 +2,7 @@
   "messages": {
     "server": {
       "message_types": {
+        "SERVER_TEXT": "server_text",
         "VERIFICATION_RESPONSE": "verification_response"
       },
       "server_response_errors": {
@@ -21,7 +22,7 @@
     },
     "client": {
       "message_types": {
-        "TEXT": "text",
+        "CLIENT_TEXT": "client_text",
         "VERIFICATION_REQUEST": "verification_request"
       }
     },
