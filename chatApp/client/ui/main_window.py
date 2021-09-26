@@ -2,16 +2,18 @@ from tkinter import *
 from PIL import ImageTk, Image
 import threading
 
-from client import client
+from chatapp.client import client
+from chatapp import path_util
 
-
+# TODO:
+# -use os.sep instead of \\ when opening files
 
 class Window:
     def __init__(self, master):
         self.roman = ("Times New Roman", 19)
         assert isinstance(master, object)
         self.master = master
-        self.my = Image.open("images/bluephoto.png")
+        self.my = Image.open(path_util.get_file_path("client\\ui\\images", "bluephoto.png"))
         self.my = self.my.resize((620, 695))
 
         self.blue_img = ImageTk.PhotoImage(self.my)
@@ -31,12 +33,12 @@ class Window:
         self.error_messages = Text(self.master, font=('Times New Roman', 11))
         self.error_messages.place(x=640, y=300)
 
-        self.image_btn = PhotoImage(file="images/Join-Button.png")
+        self.image_btn = PhotoImage(file=path_util.get_file_path("client\\ui\\images", "Join-Button.png"))
         self.btn_label = Label(self.master, image=self.image_btn)
         self.join_btn = Button(self.master, image=self.image_btn, borderwidth=0, command=lambda: self.open_chat())
         self.join_btn.place(x=50, y=420)
         
-        self.save = PhotoImage(file="images/save.png")
+        self.save = PhotoImage(file=path_util.get_file_path("client\\ui\\images", "save.png"))
         self.save_label = Label(self.master, image=self.save)
         self.save_button = Button(self.master, image=self.save, borderwidth=0)
         self.save_button.place(x=180, y=150)
@@ -55,7 +57,7 @@ class Window:
         self.main_text_box = Text(self.f, padx=18, pady=70, font=('Times New Roman', 11))
         self.main_text_box.place(x=1, y=0)
 
-        self.send_img = PhotoImage(file='images/send4.png')
+        self.send_img = PhotoImage(file=path_util.get_file_path('client\\ui\\images', 'send4.png'))
         self.send_button = Button(self.f, image=self.send_img, borderwidth=0, command=lambda:self.send_message())
         self.send_button.place(x=150, y=600)
 

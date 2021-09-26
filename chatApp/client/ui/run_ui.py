@@ -1,5 +1,5 @@
 from tkinter import *
-from main_window import Window
+from chatapp.client.ui.main_window import Window
 
 def run_ui():
     root = Tk()

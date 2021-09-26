@@ -5,7 +5,7 @@ import os
 from chatapp import path_util
 
 # loading config using dynamically generated absolute path
-shared_config_file_path = os.path.join(path_util.get_data_path('shared'), 'shared_config.json')
+shared_config_file_path = os.path.join(path_util.get_dir_path('shared'), 'shared_config.json')
 with open(shared_config_file_path, 'r') as config_json:
   shared_config = json.load(config_json)
   

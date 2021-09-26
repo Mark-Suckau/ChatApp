@@ -38,12 +38,12 @@ _error_msg_: used by server to describe error (describes status code if an error
 ### Message Types
 
 **SERVER**
-SERVER_TEXT: Normal text message that is forwarded by the server to all clients (who should receive it), (server received a CLIENT_TEXT message), this variant requires the username of the client that sent it to the server
-VERIFICATION_RESPONSE: Response to a VERIFICATION_REQUEST made by a client
+_SERVER_TEXT_: Normal text message that is forwarded by the server to all clients (who should receive it), (server received a CLIENT*TEXT message), this variant requires the username of the client that sent it to the server
+\_VERIFICATION_RESPONSE*: Response to a VERIFICATION_REQUEST made by a client
 
 **CLIENT**
-CLIENT_TEXT: Normal text message that is sent to the server from one client, this variant does not require a username
-VERIFICATION_REQUEST: Request to the server to log in as a given user
+_CLIENT_TEXT_: Normal text message that is sent to the server from one client, this variant does not require a username
+_VERIFICATION_REQUEST_: Request to the server to log in as a given user
 
 #### Note on TEXT types
 
@@ -52,3 +52,16 @@ Both TEXT message type variants are meant to be used for clients sending message
 ## Note on config files
 
 There are three total config files, one in shared folder, one in server folder and one in client folder. The one in shared contains information that isn't sensitive and can be shared with anyone. Information in the client folder, likewise can be shared with anyone, it is only useful for the client and not the server though, which is why the information in the client config file isn't also in shared. The information from the server config file contains the ips and ports for the database server and in the future other things that should only be visible to the server.
+
+## Executing Files
+
+Files must be executed from terminal using python -m packagename.package.module instead of directly using python modulename. When doing this you must also be in the directory directly above the top level package. Also note that the actual top level package name is chatapp not ChatApp.
+
+### EXAMPLES
+
+_DIR_: Path/to/repository/ChatApp,
+_CMD to start server_: python -m chatapp.server.server
+_CMD to start client (terminal)_: python -m chatapp.client.client
+_CMD to start client (gui)_: python -m chatapp.client.ui.run_ui
+
+Execution of any file can be halted from the terminal using CTRL^C
