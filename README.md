@@ -32,20 +32,20 @@ _type_: used for all messages, allows receiver to properly process message
 _username_: used by client for verification requests
 _password_: used by client for verification requests
 _verified_: used by server for verification responses
-_status_code_: used by server for sending status code to clients
-_error_msg_: used by server to describe error (describes status code if an error occured)
+_status\_code_: used by server for sending status code to clients
+_error\_msg_: used by server to describe error (describes status code if an error occured)
 
 ### Message Types
 
 **SERVER**
 
-_SERVER_TEXT_: Normal text message that is forwarded by the server to all clients (who should receive it), (server received a CLIENT*TEXT message), this variant requires the username of the client that sent it to the server
-\_VERIFICATION_RESPONSE*: Response to a VERIFICATION_REQUEST made by a client
+_SERVER\_TEXT_: Normal text message that is forwarded by the server to all clients (who should receive it), (server received a CLIENT*TEXT message), this variant requires the username of the client that sent it to the server
+_VERIFICATION\_RESPONSE_: Response to a VERIFICATION_REQUEST made by a client
 
 **CLIENT**
 
-_CLIENT_TEXT_: Normal text message that is sent to the server from one client, this variant does not require a username
-_VERIFICATION_REQUEST_: Request to the server to log in as a given user
+_CLIENT\_TEXT_: Normal text message that is sent to the server from one client, this variant does not require a username
+_VERIFICATION\_REQUEST_: Request to the server to log in as a given user
 
 #### Note on TEXT types
 
