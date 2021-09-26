@@ -38,12 +38,14 @@ _error_msg_: used by server to describe error (describes status code if an error
 ### Message Types
 
 **SERVER**
-SERVER_TEXT: Normal text message that is forwarded by the server to all clients (who should receive it), (server received a CLIENT_TEXT message), this variant requires the username of the client that sent it to the server
-VERIFICATION_RESPONSE: Response to a VERIFICATION_REQUEST made by a client
+
+_SERVER_TEXT_: Normal text message that is forwarded by the server to all clients (who should receive it), (server received a CLIENT_TEXT message), this variant requires the username of the client that sent it to the server
+_VERIFICATION_RESPONSE_: Response to a VERIFICATION_REQUEST made by a client
 
 **CLIENT**
-CLIENT_TEXT: Normal text message that is sent to the server from one client, this variant does not require a username
-VERIFICATION_REQUEST: Request to the server to log in as a given user
+
+_CLIENT_TEXT_: Normal text message that is sent to the server from one client, this variant does not require a username
+_VERIFICATION_REQUEST_: Request to the server to log in as a given user
 
 #### Note on TEXT types
 
