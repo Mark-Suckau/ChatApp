@@ -57,11 +57,11 @@ There are three total config files, one in shared folder, one in server folder a
 
 ## Executing Files
 
-Files must be executed from terminal using python -m packagename.package.module instead of directly using python modulename. When doing this you must also be in the directory directly above the top level package. Also note that the actual top level package name is chatapp not ChatApp.
+Files must be executed from terminal using python -m packagename.package.module instead of directly using python modulename. When doing this your working directory must be directly above the top level package. Also note that the actual top level package name is chatapp not ChatApp.
 
 ### EXAMPLES
 
-_DIR_: Path/to/repository/ChatApp,
+_Working Directory_: Path/to/repository/ChatApp
 _CMD to start server_: python -m chatapp.server.server
 _CMD to start client (terminal)_: python -m chatapp.client.client
 _CMD to start client (gui)_: python -m chatapp.client.ui.run_ui
