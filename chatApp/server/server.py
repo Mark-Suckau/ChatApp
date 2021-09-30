@@ -1,6 +1,9 @@
 import socket, queue, select, json, traceback
 from datetime import datetime
 from chatapp.shared import message
+from chatapp.server import db_connector
+
+
 class TCP_Nonblocking_Server:
   def __init__(self, host, port, verbose_output=True):
     self.host = host

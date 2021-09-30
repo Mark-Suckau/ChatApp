@@ -5,6 +5,9 @@
   },
   "postgres_server": {
     "ip": "172.0.0.1",
-    "port": 5432
+    "port": 5432,
+    "dbname": "dbname",
+    "user": "username",
+    "password": "password"
   }
 }

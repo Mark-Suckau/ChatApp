@@ -5,7 +5,7 @@ class DB_Connector:
     self.conn = psycopg2.connect(host=host,
                                  port=port, 
                                  dbname=dbname, 
-                                 username=username, 
+                                 user=username,
                                  password=password)
     
     self.cursor = self.conn.cursor()
@@ -58,6 +58,10 @@ class DB_Connector:
                         );
                         ''')
     self.conn.commit()
+    
+  def insert_user(self, user_name, user_password_hash):
+    self.cursor.execute('''INSERT INTO users (user_name, user_password_hash)
+                        VALUES (%s, %s)''', (user_name, user_password_hash))
       
   def insert_message(self, create_date, message_body, creator_id, room_id):
     # inserts a message into "message" table
