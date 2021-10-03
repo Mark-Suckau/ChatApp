@@ -1,7 +1,5 @@
 # used to unify format of messages sent between server and client so that a single file can be changed to change formatting
-import json
-
-import os
+import json, os
 from chatapp import path_util
 
 # loading config using dynamically generated absolute path
@@ -9,19 +7,18 @@ shared_config_file_path = os.path.join(path_util.get_dir_path('shared'), 'shared
 with open(shared_config_file_path, 'r') as config_json:
   shared_config = json.load(config_json)
   
-config_msg_types_client = shared_config['messages']['client']['message_types']
-config_msg_types_server = shared_config['messages']['server']['message_types']
+config_msg_types = shared_config['messages']['message_types']
 
 # list of all possible message types
-message_types = [config_msg_types_client['CLIENT_TEXT'], config_msg_types_server['SERVER_TEXT'],
-                 config_msg_types_client['VERIFICATION_REQUEST'], config_msg_types_server['VERIFICATION_RESPONSE']]
+message_types = [config_msg_types['CLIENT_TEXT'], config_msg_types['SERVER_TEXT'],
+                 config_msg_types['VERIFICATION_REQUEST'], config_msg_types['VERIFICATION_RESPONSE']]
 
 # required variables in a message for a given message type
 types_required_fields = {
-  config_msg_types_client['CLIENT_TEXT']: ['msg_body'], # text that is sent to server as text from client which will be broadcast to clients from server
-  config_msg_types_server['SERVER_TEXT']: ['msg_body', 'username'], # text that is sent broadcast to all clients from server (received from a client to server as client_text)
-  config_msg_types_client['VERIFICATION_REQUEST']: ['username', 'password'],
-  config_msg_types_server['VERIFICATION_RESPONSE']: ['verified', 'error_msg', 'status_code']
+  config_msg_types['CLIENT_TEXT']: ['msg_body'], # text that is sent to server as text from client which will be broadcast to clients from server
+  config_msg_types['SERVER_TEXT']: ['msg_body', 'username'], # text that is sent broadcast to all clients from server (received from a client to server as client_text)
+  config_msg_types['VERIFICATION_REQUEST']: ['username', 'password'],
+  config_msg_types['VERIFICATION_RESPONSE']: ['verified', 'error_msg', 'status_code']
 }
 
 

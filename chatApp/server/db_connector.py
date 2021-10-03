@@ -60,28 +60,48 @@ class DB_Connector:
     self.conn.commit()
     
   def insert_user(self, user_name, user_password_hash):
-    self.cursor.execute('''INSERT INTO users (user_name, user_password_hash)
+    duplicates = self.cursor.execute('''SELECT * FROM users WHERE user_name = %s''', (user_name))
+    
+    if duplicates:
+      raise Exception('User with supplied user_name already exists')
+      
+    output = self.cursor.execute('''INSERT INTO users (user_name, user_password_hash)
                         VALUES (%s, %s)''', (user_name, user_password_hash))
+    self.conn.commit()
+    return output
+    
+  def insert_room(self, room_name):
+    output = self.cursor.execute('''INSERT INTO room (room_name)
+                        VALUES (%s)''', (room_name))
+    self.conn.commit()
+    return output
+  
+    
       
   def insert_message(self, create_date, message_body, creator_id, room_id):
     # inserts a message into "message" table
-    self.cursor.execute('''INSERT INTO message (create_date, message_body, creator_id, room_id) 
+    output = self.cursor.execute('''INSERT INTO message (create_date, message_body, creator_id, room_id) 
                         VALUES (%d, %-s, %s, %s)''', 
                         create_date, message_body, creator_id, room_id)
     self.conn.commit()
+    return output
+    
     
   def add_user_to_room(self, user_id, room_id):
     # adds a given user to a given room
-    self.cursor.execute('''INSERT INTO user_room (user_id, room_id)
-                        VALUES (%s, %s);''', user_id, room_id)
+    output = self.cursor.execute('''INSERT INTO user_room (user_id, room_id)
+                        VALUES (%s, %s);''', (user_id, room_id))
     self.conn.commit()
+    return output
+    
     
   def remove_user_from_room(self, user_id, room_id):
     # removes a given user from a given room
-    self.cursor.execute('''DELETE FROM user_room
+    output = self.cursor.execute('''DELETE FROM user_room
                         WHERE user_id = %s
-                        AND room_id = %s;''', user_id, room_id)
+                        AND room_id = %s;''', (user_id, room_id))
     self.conn.commit()
+    return output
     
   def get_user_rooms(self, user_id):
     # returns all rooms a given user is apart of (used to determine: if a user is allowed to read/write messages to this room; gives client data on what rooms to display on gui when user logs on)
@@ -89,8 +109,7 @@ class DB_Connector:
                                     FROM user_room
                                     INNER JOIN room
                                     ON user_room.room_id = room.room_id
-                                    WHERE user_room.user_id = %s;''', 
-                                    user_id)
+                                    WHERE user_room.user_id = %s;''', (user_id))
     
     return user_rooms
   
@@ -98,7 +117,7 @@ class DB_Connector:
     # returns all users in a given room
     room_users = self.cursor.execute('''SELECT *
                                     FROM room
-                                    WHERE room_id = %s;''', room_id)
+                                    WHERE room_id = %s;''', (room_id))
     
     return room_users
   
@@ -111,7 +130,7 @@ class DB_Connector:
                                        WHERE NOT (create_date < %d OR
                                        create_date > %d) AND
                                        message.room_id = %s;''', 
-                                       start_date, end_date, room_id)
+                                       (start_date, end_date, room_id))
     
     return room_messages
   
@@ -127,7 +146,7 @@ class DB_Connector:
                                   ON message.room_id = room.room_id
                                   WHERE NOT (message.create_date < %d 
                                   OR message.create_date > %d) 
-                                  AND users.user_id = 1;''', start_date, end_date, user_id)
+                                  AND users.user_id = 1;''', (start_date, end_date, user_id))
     
     return user_messages
   
@@ -145,7 +164,7 @@ class DB_Connector:
                                   WHERE NOT (message.create_date < %d 
                                   OR message.create_date > %d) 
                                   AND message.room_id = %s
-                                  AND users.user_id = 1;''', start_date, end_date, room_id, user_id)
+                                  AND users.user_id = 1;''', (start_date, end_date, room_id, user_id))
     
     return messages
     

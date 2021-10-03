@@ -42,7 +42,7 @@ class TCP_Nonblocking_Server:
     client_sock, client_addr = self.sock.accept()
     self.print_tstamp(f'Accepted new connection from {client_addr}')
     
-    client_sock.setblocking(False)
+    client_sock.setblocking(False) 
     
     self.client_info[client_sock] = {'address': client_addr, 'verified': False}
     self.client_list.append(client_sock)
@@ -78,12 +78,12 @@ class TCP_Nonblocking_Server:
       # check if client is verified
       if not client_verified:
         # check if client is sending a valid verification request
-        if message.is_type(data, message.config_msg_types_client['VERIFICATION_REQUEST']):
+        if message.is_type(data, message.config_msg_types['VERIFICATION_REQUEST']):
           
           # attempt to verify client
           could_verify = self.verify_client(client_sock, data['username'], data['password'])
 
-          msg = message.create_message(type=message.config_msg_types_server['VERIFICATION_RESPONSE'], verified=could_verify, error_msg='a', status_code='a')
+          msg = message.create_message(type=message.config_msg_types['VERIFICATION_RESPONSE'], verified=could_verify, error_msg='a', status_code='a')
           msg = json.dumps(msg)
           msg = msg.encode(self.format)
           
@@ -99,7 +99,7 @@ class TCP_Nonblocking_Server:
           
       else:
         # if client is verified, then check if message is correctly formatted and accept message, not correctly formatted messages will be ignored
-        if message.is_type(data, 'CLIENT_TEXT'):
+        if message.is_type(data, message.config_msg_types['CLIENT_TEXT']):
           self.print_tstamp(f'{client_addr} client says: [{data}]')
 
           self.client_messages.put(data)
@@ -148,7 +148,7 @@ class TCP_Nonblocking_Server:
       client_addr = self.client_info[client_sock]['address']
       client_username = self.client_info[client_sock]['username']
       
-      msg = message.create_message(type=message.config_msg_types_server['SERVER_TEXT'], msg_body=msg_content, username=client_username)
+      msg = message.create_message(type=message.config_msg_types['SERVER_TEXT'], msg_body=msg_content, username=client_username)
       
       msg = json.dumps(msg)            # convert msg from python dict to json string
       msg = msg.encode(self.format)             # encoding msg from json string to utf-8 bytes

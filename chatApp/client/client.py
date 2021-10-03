@@ -62,7 +62,7 @@ class TCP_Nonblocking_Client:
       
   def send_verification(self, username, password):
     # attempts to verify username, password with server; returns response from server or false if response from server was incorrectly formatted
-    msg = message.create_message(message.config_msg_types_client['VERIFICATION_REQUEST'], username=username, password=password)
+    msg = message.create_message(message.config_msg_types['VERIFICATION_REQUEST'], username=username, password=password)
     msg = json.dumps(msg)
     msg = msg.encode(self.format)
     
@@ -71,7 +71,7 @@ class TCP_Nonblocking_Client:
     response = response.decode(self.format)
     response = json.loads(response)
     
-    if message.is_type(response, message.config_msg_types_server['VERIFICATION_RESPONSE']):
+    if message.is_type(response, message.config_msg_types['VERIFICATION_RESPONSE']):
       return response
     
     return False
@@ -79,7 +79,7 @@ class TCP_Nonblocking_Client:
   def send_message(self, msg):
     try:
       if msg:
-        msg = message.create_message(message.config_msg_types_client['CLIENT_TEXT'], msg_body=msg)
+        msg = message.create_message(message.config_msg_types['CLIENT_TEXT'], msg_body=msg)
         msg = json.dumps(msg)  # convert python dict to json string
         msg = msg.encode(self.format)   # convert json string to utf-8 bytes
         send_info = self.sock.send(msg) # send json string encoded with utf-8
@@ -135,7 +135,7 @@ def run_client():
     print('Password: ')
     password = input()
     
-    tcp_client = TCP_Nonblocking_Client('localhost', 8080, username, password)
+    tcp_client = TCP_Nonblocking_Client('localhost', 8080, username, password, True)
     tcp_client.create_socket()
     tcp_client.connect_to_server()
 
