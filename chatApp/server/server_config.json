@@ -4,10 +4,10 @@
     "port": 8080
   },
   "postgres_server": {
-    "ip": "172.0.0.1",
+    "ip": "127.0.0.1",
     "port": 5432,
-    "dbname": "dbname",
-    "user": "username",
-    "password": "password"
+    "dbname": "",
+    "user": "",
+    "password": ""
   }
 }

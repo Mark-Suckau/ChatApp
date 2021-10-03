@@ -1,8 +1,12 @@
 import socket, queue, select, json, traceback
 from datetime import datetime
 from chatapp.shared import message
-from chatapp.server import db_connector
+from chatapp.server import db_connector as db_conn
+from chatapp.server import load_server_config
 
+server_config = load_server_config.load_config()
+server_config_python_server = server_config['python_server']
+server_config_postgres_server = server_config['postgres_server']
 
 class TCP_Nonblocking_Server:
   def __init__(self, host, port, verbose_output=True):
@@ -18,6 +22,12 @@ class TCP_Nonblocking_Server:
     self.client_info = {} # used for storing info about sockets (ex. address, etc.)
     self.client_messages = queue.Queue() # used for saving messages from clients before sending them to all other clients
     
+    self.db_connector = db_conn.DB_Connector(server_config_postgres_server['ip'],
+                                                  server_config_postgres_server['port'],
+                                                  server_config_postgres_server['dbname'],
+                                                  server_config_postgres_server['user'],
+                                                  server_config_postgres_server['password'])
+    
     self.configure_server()
   
   def print_tstamp(self, msg):
@@ -26,15 +36,16 @@ class TCP_Nonblocking_Server:
       print(f'[{current_time}] [SERVER] {msg}')
     
   def configure_server(self):
+    self.print_tstamp('Initializing database...')
+    self.db_connector.create_tables_if_needed()
+    
     self.print_tstamp('Creating socket...')
     self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    self.print_tstamp('Socket created')
     
     self.sock.setblocking(False)
     
-    self.print_tstamp(f'Binding socket to {self.host} on port {self.port}')
+    self.print_tstamp(f'Binding socket to [{self.host}] on port [{self.port}]...')
     self.sock.bind((self.host, self.port))
-    self.print_tstamp(f'Bound socket to {self.host} on port {self.port}')
     
     self.client_list.append(self.sock)
     
