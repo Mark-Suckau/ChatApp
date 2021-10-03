@@ -6,8 +6,8 @@
   "postgres_server": {
     "ip": "127.0.0.1",
     "port": 5432,
-    "dbname": "",
-    "user": "",
-    "password": ""
+    "dbname": "chatapp",
+    "user": "postgres",
+    "password": "root"
   }
 }

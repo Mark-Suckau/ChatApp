@@ -1,3 +1,4 @@
 *.pyc
 TODO
 test.py
+server_config.json
