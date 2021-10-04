@@ -32,20 +32,20 @@ _type_: used for all messages, allows receiver to properly process message
 _username_: used by client for verification requests
 _password_: used by client for verification requests
 _verified_: used by server for verification responses
-_status\_code_: used by server for sending status code to clients
-_error\_msg_: used by server to describe error (describes status code if an error occured)
+_status_code_: used by server for sending status code to clients
+_error_msg_: used by server to describe error (describes status code if an error occured)
 
 ### Message Types
 
 **SERVER**
 
-_SERVER\_TEXT_: Normal text message that is forwarded by the server to all clients (who should receive it), (server received a CLIENT*TEXT message), this variant requires the username of the client that sent it to the server
-_VERIFICATION\_RESPONSE_: Response to a VERIFICATION_REQUEST made by a client
+_SERVER_TEXT_: Normal text message that is forwarded by the server to all clients (who should receive it), (server received a CLIENT\*TEXT message), this variant requires the username of the client that sent it to the server
+_VERIFICATION_RESPONSE_: Response to a VERIFICATION_REQUEST made by a client
 
 **CLIENT**
 
-_CLIENT\_TEXT_: Normal text message that is sent to the server from one client, this variant does not require a username
-_VERIFICATION\_REQUEST_: Request to the server to log in as a given user
+_CLIENT_TEXT_: Normal text message that is sent to the server from one client, this variant does not require a username
+_VERIFICATION_REQUEST_: Request to the server to log in as a given user
 
 #### Note on TEXT types
 
@@ -55,7 +55,11 @@ Both TEXT message type variants are meant to be used for clients sending message
 
 There are three total config files, one in shared folder, one in server folder and one in client folder. The one in shared contains information that isn't sensitive and can be shared with anyone. Information in the client folder, likewise can be shared with anyone, it is only useful for the client and not the server though, which is why the information in the client config file isn't also in shared. The information from the server config file contains the ips and ports for the database server and in the future other things that should only be visible to the server.
 
-## Executing Files
+## Usage
+
+Postgresql database must be running in order to run server
+
+### Executing Files
 
 Files must be executed from terminal using python -m packagename.package.module instead of directly using python modulename. When doing this your working directory must be directly above the top level package. Also note that the actual top level package name is chatapp not ChatApp.
 

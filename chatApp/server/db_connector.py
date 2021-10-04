@@ -1,5 +1,7 @@
 import psycopg2
 
+from chatapp.shared import exceptions
+
 # NOTE: psycopg2 requires variables be passed into queries in tuples when using cursor.execute(),
 # with just one variable it is required to add a comma at the end to convert to tuple instead of keeping it as a string
 # ex. cursor.execute('SELECT * FROM users WHERE user_name = %s;', (user_name,))
@@ -18,13 +20,13 @@ class DB_Connector:
     # creates tables if they dont already exists using schema from sql/create_tables
     self.cursor.execute('''CREATE TABLE IF NOT EXISTS users(
                           user_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-                          user_name VARCHAR(255) NOT NULL,
-                          user_password_hash VARCHAR(255) NOT NULL
+                          user_name VARCHAR(32) NOT NULL,
+                          user_password_hash VARCHAR(64) NOT NULL
                         );
 
                         CREATE TABLE IF NOT EXISTS room(
                           room_id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-                          room_name VARCHAR(255) NOT NULL
+                          room_name VARCHAR(32) NOT NULL
                         );
 
                         CREATE TABLE IF NOT EXISTS user_room(
@@ -68,7 +70,7 @@ class DB_Connector:
     duplicates = self.cursor.fetchall()
 
     if duplicates:
-      raise Exception('User with supplied user_name already exists')
+      raise exceptions.DuplicateUserError(user_name)
       
     output = self.cursor.execute('''INSERT INTO users (user_name, user_password_hash)
                         VALUES (%s, %s);''', (user_name, user_password_hash))
@@ -80,7 +82,7 @@ class DB_Connector:
     duplicates = self.cursor.fetchall()
     
     if duplicates:
-      raise Exception('Room with supplied room_name already exists')
+      raise exceptions.DuplicateRoomError(room_name)
     
     output = self.cursor.execute('''INSERT INTO room (room_name)
                         VALUES (%s);''', (room_name,))
@@ -103,7 +105,7 @@ class DB_Connector:
     duplicates = self.cursor.fetchall()
     
     if duplicates:
-      raise Exception('User is already appart of supplied room')
+      raise exceptions.DuplicateUserRoomError(user_id, room_id)
     
     output = self.cursor.execute('''INSERT INTO user_room (user_id, room_id)
                         VALUES (%s, %s);''', (user_id, room_id))
@@ -118,6 +120,17 @@ class DB_Connector:
     self.conn.commit()
     return output
     
+  def get_user_info(self, user_name):
+    # returns all information related to given user using user_name to identify user
+    # this function could just be used once per new client connection, by having the server cache the response
+    self.cursor.execute('''SELECT * FROM users WHERE user_name = %s;''', (user_name,))
+    matches = self.cursor.fetchone() # only "fetchone()" required since there should only be one user with that user_name
+    
+    if not matches:
+      raise exceptions.ClientLookupError(user_name)
+    
+    return matches
+      
   def get_user_rooms(self, user_id):
     # returns all rooms a given user is apart of (used to determine: if a user is allowed to read/write messages to this room; gives client data on what rooms to display on gui when user logs on)
     user_rooms = self.cursor.execute('''SELECT *

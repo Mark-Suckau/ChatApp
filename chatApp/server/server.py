@@ -1,6 +1,8 @@
 import socket, queue, select, json, traceback
 from datetime import datetime
-from chatapp.shared import message
+from hashlib import sha256
+
+from chatapp.shared import exceptions, message
 from chatapp.server import db_connector as db_conn
 from chatapp.server import load_server_config
 
@@ -89,12 +91,15 @@ class TCP_Nonblocking_Server:
       # check if client is verified
       if not client_verified:
         # check if client is sending a valid verification request
+        # TODO replace if statement with try catch using InvalidMessageFormattingError exception
         if message.is_type(data, message.config_msg_types['VERIFICATION_REQUEST']):
+          
+          # TODO remove repeating code for sending response messages
           
           # attempt to verify client
           could_verify = self.verify_client(client_sock, data['username'], data['password'])
 
-          msg = message.create_message(type=message.config_msg_types['VERIFICATION_RESPONSE'], verified=could_verify, error_msg='a', status_code='a')
+          msg = message.create_message(type=message.config_msg_types['VERIFICATION_RESPONSE'], success=could_verify, error_msg='a', status_code='a')
           msg = json.dumps(msg)
           msg = msg.encode(self.format)
           
@@ -103,7 +108,16 @@ class TCP_Nonblocking_Server:
           # close connection if couldnt verify username and/or password
           if not could_verify:
             self.close_client_socket(client_sock)
-            
+        
+        elif message.is_type(data, message.config_msg_types['SIGNUP_REQUEST']):
+          could_signup = self.sign_up_client(data['username'], data['password'])
+          
+          msg = message.create_message(type=message.config_msg_types['SIGNUP_RESPONSE'], success=could_signup, error_msg='', status_code='')
+          msg = json.dumps(msg)
+          msg = msg.encode(self.format)
+          
+          client_sock.send(msg)
+          
         else:
           # closes connection if verification message is not in correct format
           self.close_client_socket(client_sock)
@@ -130,11 +144,32 @@ class TCP_Nonblocking_Server:
   
   def verify_client(self, client_sock, username, password):
     #return True or False depending on if client could be verified
-    if username == 'testUsername' and password == 'testPassword':
+    try:
+      user_info = self.db_connector.get_user_info(username)
+    except exceptions.ClientLookupError:
+      return False
+    
+    password_hash = sha256(password.encode('utf-8')).hexdigest()
+
+    if username == user_info[1] and password_hash == user_info[2]:
       self.client_info[client_sock]['verified'] = True
+      self.client_info[client_sock]['user_id'] = user_info[0]
+      self.client_info[client_sock]['username'] = user_info[1]
       return True
 
     return False
+  
+  def sign_up_client(self, username, password):
+    # signs up new clients, client must then seperately verify to be able to use server
+    password_hash = sha256(password.encode('utf-8')).hexdigest()
+    
+    try:
+      self.db_connector.insert_user(username, password_hash)
+      return True
+    
+    except exceptions.DuplicateUserError as err:
+      self.print_tstamp(err.message)
+      return False
   
   def broadcast_message(self, client_socks):
     # broadcasts messages sent from other clients to other clients

@@ -1,6 +1,7 @@
 # used to unify format of messages sent between server and client so that a single file can be changed to change formatting
 import json, os
 from chatapp import path_util
+from chatapp.shared import exceptions
 
 # loading config using dynamically generated absolute path
 shared_config_file_path = os.path.join(path_util.get_dir_path('shared'), 'shared_config.json')
@@ -11,18 +12,21 @@ config_msg_types = shared_config['messages']['message_types']
 
 # list of all possible message types
 message_types = [config_msg_types['CLIENT_TEXT'], config_msg_types['SERVER_TEXT'],
-                 config_msg_types['VERIFICATION_REQUEST'], config_msg_types['VERIFICATION_RESPONSE']]
+                 config_msg_types['VERIFICATION_REQUEST'], config_msg_types['VERIFICATION_RESPONSE'],
+                 config_msg_types['SIGNUP_REQUEST'], config_msg_types['SIGNUP_RESPONSE']]
 
 # required variables in a message for a given message type
 types_required_fields = {
   config_msg_types['CLIENT_TEXT']: ['msg_body'], # text that is sent to server as text from client which will be broadcast to clients from server
   config_msg_types['SERVER_TEXT']: ['msg_body', 'username'], # text that is sent broadcast to all clients from server (received from a client to server as client_text)
   config_msg_types['VERIFICATION_REQUEST']: ['username', 'password'],
-  config_msg_types['VERIFICATION_RESPONSE']: ['verified', 'error_msg', 'status_code']
+  config_msg_types['VERIFICATION_RESPONSE']: ['success', 'error_msg', 'status_code'],
+  config_msg_types['SIGNUP_REQUEST']: ['username', 'password'],
+  config_msg_types['SIGNUP_RESPONSE']: ['success', 'error_msg', 'status_code']
 }
 
 
-def create_message(type, msg_body=None, username=None, password=None, verified=None, status_code=None, error_msg=None):
+def create_message(type, msg_body=None, username=None, password=None, success=None, status_code=None, error_msg=None):
   # type used for all messages, allows receiver to properly process message
   # msg_body used by client for sending texts
   # username used by client for verification requests
@@ -33,13 +37,13 @@ def create_message(type, msg_body=None, username=None, password=None, verified=N
   
   # first adds all params, then removes params that where None (not supplied)
   msg = {'type': type, 'msg_body': msg_body, 'username': username, 'password': password, 
-         'verified': verified, 'status_code': status_code, 'error_msg': error_msg}
+         'success': success, 'status_code': status_code, 'error_msg': error_msg}
   
   msg = remove_null_keys(msg)
   
   if valid_message(msg):
     return msg
-  raise Exception('Invalid message formatting')
+  raise exceptions.InvalidMessageFormattingError(msg)
   
 def remove_null_keys(msg):
   new_msg = {}

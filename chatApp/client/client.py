@@ -27,17 +27,20 @@ class TCP_Nonblocking_Client:
     self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     self.print_tstamp(f'Socket created')
 
-  def connect_to_server(self):
+  def connect_to_server(self, should_signup):
     # returns True/False if successfully connected, along with message to be displayed by ui incase something goes wrong
     try:
       self.print_tstamp(f'Connecting to server [{self.host}] on port [{self.port}]...')
       self.sock.connect((self.host, self.port))
       self.print_tstamp(f'Connected to server [{self.host}] on port [{self.port}]')
 
+      if should_signup:
+        signup_response = self.send_signup(self.username, self.password)
+      
       self.print_tstamp('Verifying username and password with server...')
       
       verification_response = self.send_verification(self.username, self.password)
-      if verification_response['verified']:
+      if verification_response['success']:
         self.print_tstamp('Username and password verified with server')
         
         return True, ''
@@ -72,6 +75,22 @@ class TCP_Nonblocking_Client:
     response = json.loads(response)
     
     if message.is_type(response, message.config_msg_types['VERIFICATION_RESPONSE']):
+      return response
+    
+    return False
+    
+  def send_signup(self, username, password):
+    # attempts to signup new user with username, password
+    msg = message.create_message(message.config_msg_types['SIGNUP_REQUEST'], username=username, password=password)
+    msg = json.dumps(msg)
+    msg = msg.encode(self.format)
+    
+    self.sock.send(msg)
+    response = self.sock.recv(128)
+    response = response.decode(self.format)
+    response = json.loads(response)
+    
+    if message.is_type(response, message.config_msg_types['SIGNUP_RESPONSE']):
       return response
     
     return False
@@ -130,6 +149,14 @@ class TCP_Nonblocking_Client:
     
 def run_client():
   try:
+    print('Signup then login? [y/n]')
+    is_signup = input()
+    is_signup.lower()
+    if is_signup == 'y':
+      is_signup = True
+    else:
+      is_signup = False  
+    
     print('Username: ')
     username = input()
     print('Password: ')
@@ -137,7 +164,7 @@ def run_client():
     
     tcp_client = TCP_Nonblocking_Client('localhost', 8080, username, password, True)
     tcp_client.create_socket()
-    tcp_client.connect_to_server()
+    tcp_client.connect_to_server(is_signup)
 
     thread = threading.Thread(target=tcp_client.read_message_loop)
     thread.daemon = True

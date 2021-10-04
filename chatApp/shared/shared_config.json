@@ -1,10 +1,6 @@
 {
   "messages": {
     "server": {
-      "server_response_errors": {
-        "VERIFICATION_FAILURE": "Username and password could not be verified with server",
-        "VERIFICATION_INVALID_FORMAT": "Message sent to server was not valid verification request message"
-      },
       "server_status": {
         "CONNECTION_ACCEPTED": "f'Accepted new connection from {client_addr}'",
         "CONNECTION_CLOSED": "f'Socket closed from address {client_addr}'",
@@ -19,9 +15,11 @@
     "message_types": {
       "CLIENT_TEXT": "client_text",
       "VERIFICATION_REQUEST": "verification_request",
+      "SIGNUP_REQUEST": "signup_request",
 
       "SERVER_TEXT": "server_text",
-      "VERIFICATION_RESPONSE": "verification_response"
+      "VERIFICATION_RESPONSE": "verification_response",
+      "SIGNUP_RESPONSE": "signup_response"
     },
     "status_codes": {
       "401": "Unauthorized"
