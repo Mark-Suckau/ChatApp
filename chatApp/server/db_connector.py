@@ -70,7 +70,7 @@ class DB_Connector:
     duplicates = self.cursor.fetchall()
 
     if duplicates:
-      raise exception.DuplicateUserError(user_name)
+      raise exception.DuplicateUserError('A user was attempted to be inserted to database that already exists', user_name)
       
     output = self.cursor.execute('''INSERT INTO users (user_name, user_password_hash)
                         VALUES (%s, %s);''', (user_name, user_password_hash))
@@ -82,7 +82,7 @@ class DB_Connector:
     duplicates = self.cursor.fetchall()
     
     if duplicates:
-      raise exception.DuplicateRoomError(room_name)
+      raise exception.DuplicateRoomError('A room was attempted to be inserted to database that already exists', room_name)
     
     output = self.cursor.execute('''INSERT INTO room (room_name)
                         VALUES (%s);''', (room_name,))
@@ -105,7 +105,7 @@ class DB_Connector:
     duplicates = self.cursor.fetchall()
     
     if duplicates:
-      raise exception.DuplicateUserRoomError(user_id, room_id)
+      raise exception.DuplicateUserRoomError('A user was attempted to be added to room that it is already apart of', user_id, room_id)
     
     output = self.cursor.execute('''INSERT INTO user_room (user_id, room_id)
                         VALUES (%s, %s);''', (user_id, room_id))
@@ -127,7 +127,7 @@ class DB_Connector:
     matches = self.cursor.fetchone() # only "fetchone()" required since there should only be one user with that user_name
     
     if not matches:
-      raise exception.ClientLookupError(user_name)
+      raise exception.ClientLookupError(f'Could not find user with username: {user_name} in database', user_name)
     
     return matches
       

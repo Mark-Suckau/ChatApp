@@ -54,11 +54,8 @@ class TCP_Nonblocking_Client:
         
         self.print_tstamp(f'Sent {send_info} bytes to the server')
     
-    except ConnectionAbortedError as err:
+    except OSError as err:
       raise exception.ConnectionError(f'Encountered OSError: {err}')
-    
-    #except OSError as err:
-    #  raise exception.ConnectionError(f'Encountered OSError: {err}')
     
   def create_socket(self):
     self.print_tstamp('Creating socket...')
@@ -87,12 +84,13 @@ class TCP_Nonblocking_Client:
     """Attempts to verify username, password with server; returns response 
     from server or raises InvalidMessageFormattingError if response from server was incorrectly formatted"""
     
+    # TODO add output to terminal if verification was successful or not
+    
     self.print_tstamp('Attempting verification with server...')
     
     msg = message.create_message(message.config_msg_types['VERIFICATION_REQUEST'], username=username, password=password)
     self.send_message(msg)
     response = self.receive_message(128)
-    print(response) # TODO REMOVE
 
     if message.is_type(response, message.config_msg_types['VERIFICATION_RESPONSE']):
       return response
@@ -101,6 +99,8 @@ class TCP_Nonblocking_Client:
     
   def attempt_signup(self, username: str, password: str):
     """attempts to signup new user with username, password"""
+    
+    # TODO add output to terminal if signup was successful or not
     
     self.print_tstamp('Attempting signup with server...')
     
@@ -114,7 +114,6 @@ class TCP_Nonblocking_Client:
     else:
       raise exception.InvalidMessageFormattingError('Response message received from server was incorrectly formatted', response)
     
-    
   def shutdown_socket(self):
     self.print_tstamp('Closing socket...')
     self.sock.close()
@@ -125,14 +124,19 @@ class TCP_Nonblocking_Client:
     # and only display if it's a server_text message
     while True:
       try:
-        msg = self.receive_message(1024)
+        # not using receive_message() method in order to allow partial receiving of the method in case of exceptions
+        
+        #msg = self.receive_message(1024)
+        msg = self.sock.recv(1024)    # receive json string encoded with utf-8 from server
+        msg = msg.decode(self.format) # decode msg from utf-8 bytes to json string
+        msg = json.loads(msg)         # decode json string to python dict
           
       except socket.timeout:
         self.print_tstamp('Socket timed out, retrying receive')
         continue
 
-      #except exception.MessageError:
-      #  break
+      except json.JSONDecodeError:
+        pass
       
       #except:
       #  self.print_tstamp('Encountered socket error:')
@@ -183,6 +187,7 @@ def run_client():
         print('Invalid answer, please use either "y" for yes or "n" for no')
       else:
         break;
+    is_verbose_output = convert_string_bool(is_verbose_output, valid_inputs[0], valid_inputs[1])
           
     while True:
       print('Signup before logging in? [y/n]')
@@ -191,6 +196,7 @@ def run_client():
         print('Invalid answer, please use either "y" for yes or "n" for no')
       else:
         break;
+    is_signup = convert_string_bool(is_signup, valid_inputs[0], valid_inputs[1])
     
     print('Username: ')
     username = input()
@@ -201,6 +207,11 @@ def run_client():
     tcp_client = TCP_Nonblocking_Client('localhost', 8080, username, password, is_verbose_output)
     tcp_client.create_socket()
     tcp_client.establish_connection()
+    
+    if is_signup:
+      tcp_client.attempt_signup(username, password)
+      
+    tcp_client.attempt_verification(username, password)
 
     thread = threading.Thread(target=tcp_client.read_message_loop)
     thread.daemon = True
