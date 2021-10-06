@@ -1,7 +1,7 @@
 # used to unify format of messages sent between server and client so that a single file can be changed to change formatting
 import json, os
 from chatapp import path_util
-from chatapp.shared import exceptions
+from chatapp.shared import exception
 
 # loading config using dynamically generated absolute path
 shared_config_file_path = os.path.join(path_util.get_dir_path('shared'), 'shared_config.json')
@@ -43,7 +43,7 @@ def create_message(type, msg_body=None, username=None, password=None, success=No
   
   if valid_message(msg):
     return msg
-  raise exceptions.InvalidMessageFormattingError(msg)
+  raise exception.InvalidMessageFormattingError(msg)
   
 def remove_null_keys(msg):
   new_msg = {}

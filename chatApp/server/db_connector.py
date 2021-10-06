@@ -1,6 +1,6 @@
 import psycopg2
 
-from chatapp.shared import exceptions
+from chatapp.shared import exception
 
 # NOTE: psycopg2 requires variables be passed into queries in tuples when using cursor.execute(),
 # with just one variable it is required to add a comma at the end to convert to tuple instead of keeping it as a string
@@ -70,7 +70,7 @@ class DB_Connector:
     duplicates = self.cursor.fetchall()
 
     if duplicates:
-      raise exceptions.DuplicateUserError(user_name)
+      raise exception.DuplicateUserError(user_name)
       
     output = self.cursor.execute('''INSERT INTO users (user_name, user_password_hash)
                         VALUES (%s, %s);''', (user_name, user_password_hash))
@@ -82,7 +82,7 @@ class DB_Connector:
     duplicates = self.cursor.fetchall()
     
     if duplicates:
-      raise exceptions.DuplicateRoomError(room_name)
+      raise exception.DuplicateRoomError(room_name)
     
     output = self.cursor.execute('''INSERT INTO room (room_name)
                         VALUES (%s);''', (room_name,))
@@ -105,7 +105,7 @@ class DB_Connector:
     duplicates = self.cursor.fetchall()
     
     if duplicates:
-      raise exceptions.DuplicateUserRoomError(user_id, room_id)
+      raise exception.DuplicateUserRoomError(user_id, room_id)
     
     output = self.cursor.execute('''INSERT INTO user_room (user_id, room_id)
                         VALUES (%s, %s);''', (user_id, room_id))
@@ -127,7 +127,7 @@ class DB_Connector:
     matches = self.cursor.fetchone() # only "fetchone()" required since there should only be one user with that user_name
     
     if not matches:
-      raise exceptions.ClientLookupError(user_name)
+      raise exception.ClientLookupError(user_name)
     
     return matches
       

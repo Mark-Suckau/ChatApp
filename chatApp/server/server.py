@@ -2,7 +2,7 @@ import socket, queue, select, json, traceback
 from datetime import datetime
 from hashlib import sha256
 
-from chatapp.shared import exceptions, message
+from chatapp.shared import exception, message
 from chatapp.server import db_connector as db_conn
 from chatapp.server import load_server_config
 
@@ -11,7 +11,7 @@ server_config_python_server = server_config['python_server']
 server_config_postgres_server = server_config['postgres_server']
 
 class TCP_Nonblocking_Server:
-  def __init__(self, host, port, verbose_output=True):
+  def __init__(self, host, port, verbose_output=True, debug_mode=False):
     self.host = host
     self.port = port
     self.sock = None
@@ -19,10 +19,13 @@ class TCP_Nonblocking_Server:
     
     self.format = 'utf-8'
     self.verbose_output = verbose_output # determines if anything is logged to terminal
+    self.debug_mode = debug_mode # determines if information like messages being sent to server are also logged to terminal
     
     self.client_list = [] # used for storing sockets
     self.client_info = {} # used for storing info about sockets (ex. address, etc.)
     self.client_messages = queue.Queue() # used for saving messages from clients before sending them to all other clients
+
+    self.test_output = [] # TODO
     
     self.db_connector = db_conn.DB_Connector(server_config_postgres_server['ip'],
                                                   server_config_postgres_server['port'],
@@ -35,8 +38,29 @@ class TCP_Nonblocking_Server:
   def print_tstamp(self, msg):
     if self.verbose_output:
       current_time = datetime.now().strftime('%Y-%M-%d %H:%M:%S')
-      print(f'[{current_time}] [SERVER] {msg}')
+      formatted_msg = f'[{current_time}] [SERVER] {msg}'
+      print(formatted_msg)
+
+      return formatted_msg
+  
+  def print_tstamp_debug(self, msg):
+    if self.debug_mode:
+      current_time = datetime.now().strftime('%Y-%M-%d %H:%M:%S')
+      formatted_msg = f'[{current_time}] [SERVER] {msg}'
+      print(formatted_msg)
+      
+      return formatted_msg
     
+  def send_message(self, msg, client_sock):
+    msg = json.dumps(msg) # convert msg from python dict to json string
+    msg = msg.encode(self.format) # encoding msg from json string to utf-8 bytes
+    client_sock.send(msg) # sending msg
+  
+  def receive_message(self, receive_bytes):
+    msg = self.sock.recv(receive_bytes)
+    msg = msg.decode(self.format)
+    msg = json.loads(msg)
+  
   def configure_server(self):
     self.print_tstamp('Initializing database...')
     self.db_connector.create_tables_if_needed()
@@ -74,79 +98,68 @@ class TCP_Nonblocking_Server:
     self.print_tstamp(f'Socket closed from address {client_addr}')
     
   def receive_message(self, client_sock):
-    try:    
-      data_encoded = client_sock.recv(1024)
+    try:
+      try:
+        self.test_output.append(self.print_tstamp('receiving message...')) # TODO REMOVE
+        
+        data_encoded = client_sock.recv(1024)
+        data = data_encoded.decode(self.format) # decoding from utf-8 bytes to string
+        data = json.loads(data)                 # converting from json string to python dict
+        
+        self.test_output.append(self.print_tstamp(f'received message: {data}')) # TODO REMOVE
+
+      except json.JSONDecodeError:
+        # no data sent from client thus client must have disconnected
+        self.close_client_socket(client_sock)
+        return
+        
       client_addr = self.client_info[client_sock]['address']
       client_verified = self.client_info[client_sock]['verified']
       
-      if not data_encoded:
-        # no data sent from client thus client must have disconnected
-        self.close_client_socket(client_sock)
-        self.print_tstamp(f'{client_addr} disconnected')
-        return
+      # TODO REMOVE (test_output part not normal print)
+      self.test_output.append(self.print_tstamp_debug(f'Received message {data} from {client_addr}, client is verified: {client_verified}'))
       
-      data = data_encoded.decode(self.format) # decoding from utf-8 bytes to string
-      data = json.loads(data)                 # converting from json string to python dict
-      
-      # check if client is verified
       if not client_verified:
-        # check if client is sending a valid verification request
         # TODO replace if statement with try catch using InvalidMessageFormattingError exception
         if message.is_type(data, message.config_msg_types['VERIFICATION_REQUEST']):
-          
-          # TODO remove repeating code for sending response messages
-          
-          # attempt to verify client
           could_verify = self.verify_client(client_sock, data['username'], data['password'])
-
-          msg = message.create_message(type=message.config_msg_types['VERIFICATION_RESPONSE'], success=could_verify, error_msg='a', status_code='a')
-          msg = json.dumps(msg)
-          msg = msg.encode(self.format)
           
-          client_sock.send(msg)
-          
-          # close connection if couldnt verify username and/or password
           if not could_verify:
             self.close_client_socket(client_sock)
+          return
         
         elif message.is_type(data, message.config_msg_types['SIGNUP_REQUEST']):
-          could_signup = self.sign_up_client(data['username'], data['password'])
-          
-          msg = message.create_message(type=message.config_msg_types['SIGNUP_RESPONSE'], success=could_signup, error_msg='', status_code='')
-          msg = json.dumps(msg)
-          msg = msg.encode(self.format)
-          
-          client_sock.send(msg)
+          could_signup = self.sign_up_client(data['username'], data['password'], client_sock)
+          return
           
         else:
           # closes connection if verification message is not in correct format
           self.close_client_socket(client_sock)
-          
-      else:
-        # if client is verified, then check if message is correctly formatted and accept message, not correctly formatted messages will be ignored
-        if message.is_type(data, message.config_msg_types['CLIENT_TEXT']):
-          self.print_tstamp(f'{client_addr} client says: [{data}]')
-
-          self.client_messages.put(data)
+          return
       
+      if message.is_type(data, message.config_msg_types['CLIENT_TEXT']):
+        self.print_tstamp(f'{client_addr} client says: [{data}]')
+        self.client_messages.put(data)
+        
     except json.JSONDecodeError:
       self.print_tstamp('Encountered error: Could not decode JSON')
       traceback.print_exc()
       
       self.close_client_socket(client_sock)
-      
+    
       
     except OSError as err:
       self.print_tstamp(f'Encountered error: ')
       traceback.print_exc()
             
       self.close_client_socket(client_sock)
-  
+      
   def verify_client(self, client_sock, username, password):
     #return True or False depending on if client could be verified
+    self.print_tstamp('[VERIFYING] Attempting to verify client...')
     try:
       user_info = self.db_connector.get_user_info(username)
-    except exceptions.ClientLookupError:
+    except exception.ClientLookupError:
       return False
     
     password_hash = sha256(password.encode('utf-8')).hexdigest()
@@ -155,61 +168,61 @@ class TCP_Nonblocking_Server:
       self.client_info[client_sock]['verified'] = True
       self.client_info[client_sock]['user_id'] = user_info[0]
       self.client_info[client_sock]['username'] = user_info[1]
+      
+      msg = message.create_message(type=message.config_msg_types['VERIFICATION_RESPONSE'], success=True, error_msg='a', status_code='a')
+      self.send_message(msg, client_sock)
+    
+      self.print_tstamp('[VERIFYING] Successfully verified client')
       return True
 
+    msg = message.create_message(type=message.config_msg_types['VERIFICATION_RESPONSE'], success=False, error_msg='a', status_code='a')
+    self.send_message(msg, client_sock)
+    
+    self.print_tstamp('[VERIFYING] Failed to verify client (invalid credentials)')
     return False
   
-  def sign_up_client(self, username, password):
+  def sign_up_client(self, username, password, client_sock):
     # signs up new clients, client must then seperately verify to be able to use server
+    # TODO send response back to clients
+    
+    self.print_tstamp('[SIGNUP] Attempting to sign up client...')
     password_hash = sha256(password.encode('utf-8')).hexdigest()
     
     try:
       self.db_connector.insert_user(username, password_hash)
+      
+      msg = message.create_message(type=message.config_msg_types['SIGNUP_RESPONSE'],
+                                   success=True, error_msg='', status_code='')
+      self.send_message(msg, client_sock)
+          
+      self.print_tstamp('[SIGNUP] Successfully signed up client')
       return True
     
-    except exceptions.DuplicateUserError as err:
+    except exception.DuplicateUserError as err:
+      msg = message.create_message(type=message.config_msg_types['SIGNUP_RESPONSE'], 
+                                   success=False, error_msg='', status_code='')
+      self.send_message(msg, client_sock)
+          
+      self.print_tstamp('[SIGNUP] Failed to sign up client')
       self.print_tstamp(err.message)
       return False
   
   def broadcast_message(self, client_socks):
     # broadcasts messages sent from other clients to other clients
     # takes a list of client sockets to broadcast message to
-    try:
-      msg = self.client_messages.get_nowait() # get message sent from a client
-      msg = json.dumps(msg)          # convert from python dict to json string
-      msg = msg.encode(self.format)  # encode from json string to utf-8 bytes
-
-      self.print_tstamp(f'Broadcasting message to {len(client_socks)} clients...')
-      for s in client_socks:
-        s.send(msg)
-      self.print_tstamp(f'Broadcasted message to {len(client_socks)} clients')
     
-    except queue.Empty:
-      pass
-  
-  def send_message(self, client_sock, msg_content):
-    # respond to client with a predefined message from the server
+    # NOTE BUG (not really a bug, just a potential one) 
+    # queue.Empty exception will be raised if the client_messages 
+    # queue is empty since get_nowait() is being used (in theory this should never happen, 
+    # since messages are only broadcast when they are received)
     
-    try:
-      client_addr = self.client_info[client_sock]['address']
-      client_username = self.client_info[client_sock]['username']
-      
-      msg = message.create_message(type=message.config_msg_types['SERVER_TEXT'], msg_body=msg_content, username=client_username)
-      
-      msg = json.dumps(msg)            # convert msg from python dict to json string
-      msg = msg.encode(self.format)             # encoding msg from json string to utf-8 bytes
-      send_info = client_sock.send(msg)         # sending msg
-      
-      self.print_tstamp(f'Sent {send_info} bytes to {client_addr}')
-      
-    except KeyError:
-      # handles a condition where client socket is in the writable list
-      # even though it's been removed from the dictionary
-      pass
+    msg = self.client_messages.get_nowait() # get message sent from a client
+    self.print_tstamp_debug(f'Broadcasting {msg} to {len(client_socks)} clients')
+    msg = json.dumps(msg)          # convert from python dict to json string
+    msg = msg.encode(self.format)  # encode from json string to utf-8 bytes
     
-    except OSError as err:
-      self.print_tstamp(f'Encountered error: {err}')
-    
+    for s in client_socks:
+      s.send(msg)
     
   def handle_exception_socket(self, client_sock):
     client_addr = self.client_info[client_sock]['address']
@@ -225,14 +238,18 @@ class TCP_Nonblocking_Server:
         readable_socks, writable_socks, error_socks = select.select(self.client_list, self.client_list, self.client_list, self.timeout)
         # read from readable sockets
         for sock in readable_socks:
+          self.print_tstamp('ASDASDWAD')
           # if the socket is server socket, accept the connection
           if sock is self.sock:
             self.accept_client_socket()
-          # otherwise receive the client request
           else:
+            # otherwise receive the client request
             self.receive_message(sock)
             
         if writable_socks:
+          self.print_tstamp(f'Writable socks: {writable_socks}') # TODO REMOVE
+          # BUG server is attempting to broadcast messages even when none are saved in client_messages queue
+          # (meaning server isnt properly saving client_text messages from clients)
           self.broadcast_message(writable_socks)
         
         for sock in error_socks:
@@ -254,7 +271,7 @@ class TCP_Nonblocking_Server:
     
 
 def run_server():  
-  server = TCP_Nonblocking_Server('localhost', 8080)
+  server = TCP_Nonblocking_Server('localhost', 8080, True, False)
   server.listen_for_connections()
   
 if __name__ == '__main__':

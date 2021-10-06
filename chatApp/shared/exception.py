@@ -19,8 +19,8 @@ class DuplicateRoomError(DataBaseError):
     message -- explanation of error
     room_name -- name of room that was attempted to be inserted into database"""
     
-  def __init__(self, room_name):
-    self.message = 'Duplicate room was attempted to be inserted into database'
+  def __init__(self, message, room_name: str):
+    self.message = message
     self.room_name = room_name
     
     super().__init__(self.message)
@@ -33,8 +33,8 @@ class DuplicateUserError(DataBaseError):
     message -- explanation of error
     user_name -- name of user that was attempted to be inserted into database"""
     
-  def __init__(self, user_name):
-    self.message = 'Duplicate user was attempted to be inserted into database'
+  def __init__(self, message, user_name):
+    self.message = message
     self.user_name = user_name
     
     super().__init__(self.message)
@@ -48,8 +48,8 @@ class DuplicateUserRoomError(DataBaseError):
     user_id -- id of user that was was attempted to be added to room
     room_id -- id of room that user was attempted to be added to"""
     
-  def __init__(self, user_id, room_id):
-    self.message = 'User attempted to be added to room, but that user is already apart of that room'
+  def __init__(self, message, user_id, room_id):
+    self.message = message
     self.user_id = user_id
     self.room_id = room_id
     
@@ -63,8 +63,8 @@ class ClientLookupError(DataBaseError):
     message -- explanation of error
     user_name -- name of user whose information was attempted to be looked up"""
     
-  def __init__(self, user_name):
-    self.message = 'No information was found for a given user that was looked up in database'
+  def __init__(self, message, user_name):
+    self.message = message
     self.user_name = user_name
     
     super().__init__(self.message)
@@ -92,8 +92,8 @@ class InvalidMessageFormattingError(MessageError):
     message -- explanation of error
     invalid_message -- message that was found to be incorrectly formatted and caused the exception"""
     
-  def __init__(self, invalid_message):
-    self.message = 'Message either does not contain all required information for its message type or does not contain a message type'
+  def __init__(self, message, invalid_message):
+    self.message = message
     self.invalid_message = invalid_message
     
     super().__init__(self.message)
@@ -121,8 +121,8 @@ class ClientLoginError(AuthenticationError):
     message -- explanation of error
     client_sock -- client socket that failed to login"""
   
-  def __init__(self, client_sock):
-    self.message = 'Client could not be logged using supplied credentials'
+  def __init__(self, message, client_sock):
+    self.message = message
     self.client_sock = client_sock
     
     super().__init__(self.message)
@@ -134,8 +134,25 @@ class ClientSignupError(AuthenticationError):
     message -- explanation of error
     client_sock -- client socket that failed to signup"""
     
-  def __init__(self, client_sock):
-    self.message = 'Client could not be signed-up using supplied credentials'
+  def __init__(self, message, client_sock):
+    self.message = message
     self.client_sock = client_sock
+    
+    super().__init__(self.message)
+    
+
+
+## CONNECTIONS EXCEPTIONS ##
+
+# NOTE ConnectionError class may overwrite existing exceptions in standard python library
+
+class ConnectionError(Exception):
+  """High level exception raised for all connection errors
+  
+  Attributes:
+    message -- explanation of error"""
+  
+  def __init__(self, message):
+    self.message = message
     
     super().__init__(self.message)

@@ -73,7 +73,7 @@ class Window:
 
         self.tcp_client = client.TCP_Nonblocking_Client('localhost', 8080, self.username, self.password)
         self.tcp_client.create_socket()
-        connection_success, connection_msg = self.tcp_client.connect_to_server()
+        connection_success, connection_msg = self.tcp_client.establish_connection()
         
         if not connection_success:
             return False, connection_msg
@@ -93,7 +93,7 @@ class Window:
 
     def send_message(self):
         message = self.send_message_entry.get()
-        send_success, msg = self.tcp_client.send_message(message)
+        send_success, msg = self.tcp_client.send_text_message(message)
         if not send_success:
             self.display_error(msg)
         
