@@ -51,8 +51,12 @@ class TCP_Nonblocking_Server:
     
   def send_message(self, msg, client_sock):
     msg = json.dumps(msg) # convert msg from python dict to json string
+    
+    self.print_tstamp_debug(f'Sent message: {msg}, to client: {client_sock}')
+    
     msg = msg.encode(self.format) # encoding msg from json string to utf-8 bytes
     client_sock.send(msg) # sending msg
+    
   
   def receive_message(self, receive_bytes):
     msg = self.sock.recv(receive_bytes)
